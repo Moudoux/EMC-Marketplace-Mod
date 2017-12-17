@@ -29,7 +29,7 @@ public class ModList extends IGuiScreen {
 	private boolean overrideText = false;
 	private List list;
 	private Main main;
-	private Mod[] mods;
+	public Mod[] mods;
 
 	public ModList(Main main) {
 		this.main = main;
@@ -79,8 +79,8 @@ public class ModList extends IGuiScreen {
 		}
 		if (selected != null) {
 			if (!overrideText) {
-				getIButtonList().get(1)
-						.setText(selected.isInstalled() ? "Uninstall" : (selected.getPrice() == 0) ? "Install" : "Buy");
+				getIButtonList().get(1).setText(selected.isInstalled() ? "Uninstall"
+						: (selected.getPrice() == 0 || selected.isHasPaid()) ? "Install" : "Buy");
 			}
 			getIButtonList().get(1).setEnabled(true);
 			getIButtonList().get(2).setEnabled(true);
@@ -106,13 +106,13 @@ public class ModList extends IGuiScreen {
 				if (selected.isInstalled()) {
 					selected.uninstall();
 				} else {
-					if (selected.getPrice() == 0) {
+					if (selected.getPrice() == 0 || selected.isHasPaid()) {
 						overrideText = true;
 						getIButtonList().get(1).setText("Installing mod...");
 						selected.install(() -> {
 							overrideText = false;
 							getIButtonList().get(1).setText(selected.isInstalled() ? "Uninstall"
-									: (selected.getPrice() == 0) ? "Install" : "Buy");
+									: (selected.getPrice() == 0 || selected.isHasPaid()) ? "Install" : "Buy");
 						});
 					} else {
 						IGuiScreen.openLink(frontend + "mod/" + selected.getName());

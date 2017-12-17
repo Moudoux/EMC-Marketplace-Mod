@@ -2,6 +2,8 @@ package emc.marketplace.modinstaller;
 
 import com.google.gson.Gson;
 
+import me.deftware.client.framework.MC_OAuth.StaticOAuth;
+
 /**
  * Handles communication between this plugin and the backend
  * 
@@ -18,7 +20,20 @@ public class API {
 	 */
 	public static enum Types {
 
-		ListProducts("listproducts");
+		/**
+		 * Returns a list of all mods
+		 */
+		ListProducts("listproducts"),
+
+		/**
+		 * Get's a jar file
+		 */
+		GetProduct("getproduct?product=%s&token=%s"),
+
+		/**
+		 * Checks if a user has paid for a mod
+		 */
+		CheckProduct("getproduct?product=%s&token=%s");
 
 		String url;
 
@@ -35,9 +50,8 @@ public class API {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String fetchEndpoint(Types type) throws Exception {
-		String url = endpoint + type.url;
-		return Web.get(url);
+	public static String fetchEndpoint(Types type, Object[] args) throws Exception {
+		return Web.get(args != null ? String.format(endpoint + type.url, args) : endpoint + type.url);
 	}
 
 	/**
@@ -47,7 +61,16 @@ public class API {
 	 */
 	public static Mod[] fetchMods() {
 		try {
-			return new Gson().fromJson(fetchEndpoint(Types.ListProducts), Mod[].class);
+			Mod[] mods = new Gson().fromJson(fetchEndpoint(Types.ListProducts, null), Mod[].class);
+			for (Mod mod : mods) {
+				mod.init();
+			}
+			StaticOAuth.getToken((token) -> {
+				for (Mod mod : mods) {
+					mod.checkPaid(token);
+				}
+			});
+			return mods;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

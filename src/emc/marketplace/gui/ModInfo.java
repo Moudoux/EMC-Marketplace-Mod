@@ -29,7 +29,7 @@ public class ModInfo extends IGuiScreen {
 	protected void onInitGui() {
 		this.clearButtons();
 		this.addButton(new IGuiButton(0, getIGuiScreenWidth() / 2 - 100, getIGuiScreenHeight() - 28, 98, 20,
-				mod.isInstalled() ? "Uninstall" : mod.getPrice() == 0 ? "Install" : "Buy"));
+				mod.isInstalled() ? "Uninstall" : (mod.getPrice() == 0 || mod.isHasPaid()) ? "Install" : "Buy"));
 		this.addButton(new IGuiButton(1, getIGuiScreenWidth() / 2 + 2, getIGuiScreenHeight() - 28, 98, 20, "Back"));
 	}
 
@@ -54,7 +54,7 @@ public class ModInfo extends IGuiScreen {
 			if (mod.isInstalled()) {
 				mod.uninstall();
 			} else {
-				if (mod.getPrice() == 0) {
+				if (mod.getPrice() == 0 || mod.isHasPaid()) {
 					getIButtonList().get(0).setText("Installing mod...");
 					mod.install(() -> {
 						getIButtonList().get(0).setText("Uninstall");
