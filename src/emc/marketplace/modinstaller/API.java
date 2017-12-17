@@ -33,7 +33,7 @@ public class API {
 		/**
 		 * Checks if a user has paid for a mod
 		 */
-		CheckProduct("getproduct?product=%s&token=%s");
+		CheckProduct("checkproduct?product=%s&token=%s");
 
 		String url;
 

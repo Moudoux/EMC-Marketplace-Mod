@@ -1,6 +1,7 @@
 package emc.marketplace.modinstaller;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Base64;
 
@@ -12,6 +13,7 @@ import com.google.gson.JsonObject;
 import emc.marketplace.modinstaller.API.Types;
 import lombok.Getter;
 import me.deftware.client.framework.MC_OAuth.StaticOAuth;
+import me.deftware.client.framework.Main.FrameworkLoader;
 import me.deftware.client.framework.Wrappers.IMinecraft;
 
 /**
@@ -32,51 +34,65 @@ public class Mod {
 	private boolean hasPaid = false;
 
 	@Getter
-	private File modFile = null;
+	private File modFile = null, deleted = null;
 
 	public void init() {
 		try {
 			modFile = new File(IMinecraft.getMinecraftFile().getParentFile() + File.separator + "mods" + File.separator
 					+ Name + ".jar");
+			deleted = new File(IMinecraft.getMinecraftFile().getParentFile() + File.separator + "mods" + File.separator
+					+ Name + ".jar.delete");
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public boolean isInstalled() {
-		return modFile == null ? false : modFile.exists();
+		return modFile == null || deleted == null ? false : modFile.exists() && !deleted.exists();
 	}
 
 	public void install(InstallCallback cb) {
-		StaticOAuth.getToken((token) -> {
-			if (isInstalled()) {
-				return;
-			}
-			// Base64 encoded jar bytes
-			try {
-				String data = API.fetchEndpoint(Types.GetProduct, new String[] { Name, token });
-				JsonObject json = new Gson().fromJson(data, JsonObject.class);
-				if (json.get("success").getAsBoolean()) {
-					data = json.get("data").getAsString();
-					byte[] bytes = Base64.getDecoder().decode(data);
-					FileUtils.writeByteArrayToFile(modFile, bytes);
+		new Thread(() -> {
+			StaticOAuth.getToken((token) -> {
+				if (isInstalled()) {
+					return;
 				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-			cb.callback();
-		});
+				try {
+					String data = API.fetchEndpoint(Types.GetProduct, new String[] { Name, token });
+					JsonObject json = new Gson().fromJson(data, JsonObject.class);
+					if (json.get("success").getAsBoolean()) {
+						data = json.get("data").getAsString();
+						byte[] bytes = Base64.getDecoder().decode(data);
+						FileUtils.writeByteArrayToFile(modFile, bytes);
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				if (modFile.exists()) {
+					try {
+						FrameworkLoader.loadClient(modFile);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				cb.callback();
+			});
+		}).start();
 	}
 
 	public void uninstall() {
-		System.out.println("Uni");
 		new Thread(() -> {
-			System.out.println(isInstalled());
 			if (!isInstalled()) {
 				return;
 			}
-			// TODO: Tell EMC to unload this mod
-			modFile.delete();
+			try {
+				FileUtils.writeStringToFile(deleted, "Delete mod", "UTF-8");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (FrameworkLoader.getClients().containsKey(Name)) {
+				FrameworkLoader.getClients().remove(Name);
+			}
 		}).start();
 	}
 

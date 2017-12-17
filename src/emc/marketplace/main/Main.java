@@ -29,6 +29,13 @@ public class Main extends EMCClient {
 		}
 	}
 
+	@Override
+	public void callMethod(String method, String caller) {
+		if (method.equals("openGUI()")) {
+			IMinecraft.setGuiScreen(new ModList(this));
+		}
+	}
+
 	private void drawButton(EventGuiScreenDraw event) {
 		if ((event instanceof EventActionPerformed)) {
 			if (((EventActionPerformed) event).getId() == 25) {
