@@ -3,7 +3,7 @@
     "name":"EMC-Marketplace",
     "website":"https://github.com/Moudoux/EMC",
     "author":"Deftware",
-    "minversion":12.1,
+    "minversion":12.2,
     "version":1,
     "main":"emc.marketplace.main.Main",
     "updateLinkOverride": false

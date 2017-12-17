@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 
 import emc.marketplace.modinstaller.API.Types;
 import lombok.Getter;
+import me.deftware.client.framework.Client.EMCClient;
 import me.deftware.client.framework.MC_OAuth.StaticOAuth;
 import me.deftware.client.framework.Main.FrameworkLoader;
 import me.deftware.client.framework.Wrappers.IMinecraft;
@@ -36,6 +37,8 @@ public class Mod {
 	@Getter
 	private File modFile = null, deleted = null;
 
+	private EMCClient client = null;
+
 	public void init() {
 		try {
 			modFile = new File(IMinecraft.getMinecraftFile().getParentFile() + File.separator + "mods" + File.separator
@@ -53,6 +56,15 @@ public class Mod {
 
 	public void install(InstallCallback cb) {
 		new Thread(() -> {
+			if (deleted.exists() && modFile.exists()) {
+				deleted.delete();
+				if (!FrameworkLoader.getClients().containsKey(Name) && client != null) {
+					FrameworkLoader.getClients().put(Name, client);
+					client = null;
+				}
+				cb.callback();
+				return;
+			}
 			StaticOAuth.getToken((token) -> {
 				if (isInstalled()) {
 					return;
@@ -91,6 +103,7 @@ public class Mod {
 				e.printStackTrace();
 			}
 			if (FrameworkLoader.getClients().containsKey(Name)) {
+				client = FrameworkLoader.getClients().get(Name);
 				FrameworkLoader.getClients().remove(Name);
 			}
 		}).start();

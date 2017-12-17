@@ -181,9 +181,9 @@ public class ModList extends IGuiScreen {
 			IGlStateManager.disableBlend();
 			IGL11.disableLightning();
 
+			String price = mod.getPrice() == 0 ? "Free" : "$" + mod.getPrice() + " USD";
 			IFontRenderer.drawString("Name: " + mod.getName(), x + 31, y + 3, 10526880);
-			IFontRenderer.drawString("Price: $" + mod.getPrice() + " USD | By: " + mod.getOwner(), x + 31, y + 15,
-					10526880);
+			IFontRenderer.drawString("Price: " + price + " | By: " + mod.getOwner(), x + 31, y + 15, 10526880);
 		}
 
 	}
