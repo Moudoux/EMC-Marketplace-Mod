@@ -1,7 +1,5 @@
 package emc.marketplace.modinstaller;
 
-import com.google.gson.JsonObject;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,46 +11,35 @@ import lombok.Setter;
  */
 public class Mod {
 
-	private JsonObject data;
+	@Getter
+	String Name, Owner, Description, Version;
+
+	@Getter
+	int Price;
 
 	@Getter
 	@Setter
 	private boolean installed = false;
 
-	public Mod(JsonObject data) {
-		this.data = data;
-	}
-
-	public String getData(ModData type) {
-		return data.get(type.name().toLowerCase()).getAsString();
-	}
-
-	public JsonObject toJson() {
-		return data;
-	}
-
-	public void install() {
+	public void install(InstallCallback cb) {
 		if (installed) {
 			return;
 		}
-		if (getData(ModData.PRICE).equals("Free")) {
-			// Install
 
-		} else {
-			// License check/Buy
-
-		}
 	}
 
 	public void uninstall() {
 		if (!installed) {
 			return;
 		}
-		// TODO
+
 	}
 
-	public static enum ModData {
-		NAME, AUTHOR, DESCRIPTION, VERSION, ID, PRICE
+	@FunctionalInterface
+	public static interface InstallCallback {
+
+		public void callback();
+
 	}
 
 }

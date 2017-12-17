@@ -3,13 +3,18 @@ package emc.marketplace.gui;
 import org.lwjgl.input.Keyboard;
 
 import emc.marketplace.main.Main;
+import emc.marketplace.modinstaller.API;
 import emc.marketplace.modinstaller.Mod;
-import emc.marketplace.modinstaller.Mod.ModData;
 import me.deftware.client.framework.Wrappers.IMinecraft;
+import me.deftware.client.framework.Wrappers.Item.IItemStack;
 import me.deftware.client.framework.Wrappers.Objects.IGuiButton;
 import me.deftware.client.framework.Wrappers.Objects.IGuiScreen;
 import me.deftware.client.framework.Wrappers.Objects.IGuiSlot;
 import me.deftware.client.framework.Wrappers.Render.IFontRenderer;
+import me.deftware.client.framework.Wrappers.Render.IGL11;
+import me.deftware.client.framework.Wrappers.Render.IGlStateManager;
+import me.deftware.client.framework.Wrappers.Render.IRenderHelper;
+import me.deftware.client.framework.Wrappers.Render.IRenderItem;
 
 /**
  * The gui for browsing and installing mods
@@ -19,8 +24,12 @@ import me.deftware.client.framework.Wrappers.Render.IFontRenderer;
  */
 public class ModList extends IGuiScreen {
 
+	public static final String frontend = "https://emc.sky-net.me/";
+
+	private boolean overrideText = false;
 	private List list;
 	private Main main;
+	private Mod[] mods;
 
 	public ModList(Main main) {
 		this.main = main;
@@ -32,10 +41,14 @@ public class ModList extends IGuiScreen {
 		list.registerScrollbars(7, 8);
 		list.clickElement(-1, false, 0, 0);
 		this.clearButtons();
+		this.addButton(new IGuiButton(0, getIGuiScreenWidth() / 2 - 100, getIGuiScreenHeight() - 28, 200, 20, "Back"));
 		this.addButton(
-				new IGuiButton(0, getIGuiScreenWidth() / 2 - 100, getIGuiScreenHeight() - 28, 98, 20, "Install"));
+				new IGuiButton(1, getIGuiScreenWidth() / 2 - 100, getIGuiScreenHeight() - 51, 98, 20, "Install"));
 		this.addButton(
-				new IGuiButton(1, getIGuiScreenWidth() / 2 + 2, getIGuiScreenHeight() - 28, 98, 20, "Details..."));
+				new IGuiButton(2, getIGuiScreenWidth() / 2 + 2, getIGuiScreenHeight() - 51, 98, 20, "Details..."));
+		getIButtonList().get(1).setEnabled(false);
+		getIButtonList().get(2).setEnabled(false);
+		new Thread(() -> mods = API.fetchMods()).start();
 	}
 
 	@Override
@@ -43,8 +56,11 @@ public class ModList extends IGuiScreen {
 		this.drawIDefaultBackground();
 		list.doDraw(mouseX, mouseY, partialTicks);
 		IFontRenderer.drawCenteredString("EMC Marketplace", getIGuiScreenWidth() / 2, 8, 16777215);
-		IFontRenderer.drawCenteredString("Mods available: " + main.getModData().size(), getIGuiScreenWidth() / 2, 20,
-				16777215);
+		IFontRenderer.drawCenteredString("Mods available: " + (mods != null ? mods.length : "0"),
+				getIGuiScreenWidth() / 2, 20, 16777215);
+		if (mods == null) {
+			IFontRenderer.drawCenteredString("Loading mods... ", getIGuiScreenWidth() / 2, 45, 16777215);
+		}
 	}
 
 	@Override
@@ -54,18 +70,23 @@ public class ModList extends IGuiScreen {
 
 	@Override
 	protected void onUpdate() {
+		if (mods == null) {
+			return;
+		}
 		Mod selected = null;
-		if (!main.getModData().isEmpty() && list.getSelectedSlot() != -1) {
-			selected = main.getModData().get(list.getSelectedSlot());
+		if (!(mods.length == 0) && list.getSelectedSlot() != -1) {
+			selected = mods[list.getSelectedSlot()];
 		}
 		if (selected != null) {
-			getIButtonList().get(0).setText(selected.isInstalled() ? "Uninstall"
-					: selected.getData(ModData.PRICE).equals("Free") ? "Install" : "Buy");
-			getIButtonList().get(0).setEnabled(true);
+			if (!overrideText) {
+				getIButtonList().get(1)
+						.setText(selected.isInstalled() ? "Uninstall" : (selected.getPrice() == 0) ? "Install" : "Buy");
+			}
 			getIButtonList().get(1).setEnabled(true);
+			getIButtonList().get(2).setEnabled(true);
 		} else {
-			getIButtonList().get(0).setEnabled(false);
 			getIButtonList().get(1).setEnabled(false);
+			getIButtonList().get(2).setEnabled(false);
 		}
 	}
 
@@ -74,19 +95,33 @@ public class ModList extends IGuiScreen {
 		if (!enabled) {
 			return;
 		}
-		// We can assume the selected is not null, since you cannot press any of the
-		// buttons if no mod is selected
-		Mod selected = main.getModData().get(list.getSelectedSlot());
 		if (buttonID == 0) {
-			// Install/Buy | Uninstall
-			if (selected.isInstalled()) {
-				selected.uninstall();
-			} else {
-				selected.install();
+			IMinecraft.setGuiScreen(null);
+		} else if (mods != null) {
+			// We can assume the selected is not null, since you cannot press any of the
+			// buttons if no mod is selected
+			Mod selected = mods[list.getSelectedSlot()];
+			if (buttonID == 1) {
+				// Install/Buy | Uninstall
+				if (selected.isInstalled()) {
+					selected.uninstall();
+				} else {
+					if (selected.getPrice() == 0) {
+						overrideText = true;
+						getIButtonList().get(1).setText("Installing mod...");
+						selected.install(() -> {
+							overrideText = false;
+							getIButtonList().get(1).setText(selected.isInstalled() ? "Uninstall"
+									: (selected.getPrice() == 0) ? "Install" : "Buy");
+						});
+					} else {
+						IGuiScreen.openLink(frontend + "mod/" + selected.getName());
+					}
+				}
+			} else if (buttonID == 2) {
+				// More info
+				IMinecraft.setGuiScreen(new ModInfo(selected, main));
 			}
-		} else if (buttonID == 1) {
-			// More info
-			IMinecraft.setGuiScreen(new ModInfo(selected));
 		}
 	}
 
@@ -120,12 +155,35 @@ public class ModList extends IGuiScreen {
 
 		@Override
 		protected int getISize() {
-			return main.getModData().size();
+			return mods != null ? mods.length : 0;
 		}
 
 		@Override
 		protected void drawISlot(int id, int x, int y) {
-			// TODO
+			Mod mod = mods[id];
+
+			IGlStateManager.enableRescaleNormal();
+			IGlStateManager.enableBlend();
+			IRenderHelper.enableGUIStandardItemLighting();
+			IGlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+
+			IItemStack stack = new IItemStack(mod.isInstalled() ? "emerald" : "diamond");
+
+			try {
+				IRenderItem.renderItemAndEffectIntoGUI(stack, x + 4, y + 4);
+				IRenderItem.renderItemOverlays(stack, x + 4, y + 4);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+
+			IRenderHelper.disableStandardItemLighting();
+			IGlStateManager.disableRescaleNormal();
+			IGlStateManager.disableBlend();
+			IGL11.disableLightning();
+
+			IFontRenderer.drawString("Name: " + mod.getName(), x + 31, y + 3, 10526880);
+			IFontRenderer.drawString("Price: $" + mod.getPrice() + " USD | By: " + mod.getOwner(), x + 31, y + 15,
+					10526880);
 		}
 
 	}

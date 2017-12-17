@@ -1,0 +1,11 @@
+{
+
+    "name":"EMC-Marketplace",
+    "website":"https://github.com/Moudoux/EMC",
+    "author":"Deftware",
+    "minversion":12.1,
+    "version":1,
+    "main":"emc.marketplace.main.Main",
+    "updateLinkOverride": false
+
+}
