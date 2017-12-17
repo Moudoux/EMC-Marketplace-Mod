@@ -116,12 +116,8 @@ public class Mod {
 
 	}
 
-	public void checkPaid(String token) {
-		try {
-			hasPaid = API.fetchEndpoint(Types.CheckProduct, new String[] { Name, token }).contains("true");
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+	public void setPaid(boolean flag) {
+		this.hasPaid = flag;
 	}
 
 }
