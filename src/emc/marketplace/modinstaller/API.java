@@ -1,11 +1,8 @@
 package emc.marketplace.modinstaller;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
-import me.deftware.client.framework.MC_OAuth.StaticOAuth;
+import lombok.Getter;
 
 /**
  * Handles communication between this plugin and the backend
@@ -17,6 +14,13 @@ public class API {
 
 	private static final String endpoint = "https://emc-api.sky-net.me/";
 
+	@Getter
+	public static Mod[] mods = null;
+
+	public static void init() {
+		new Thread(() -> mods = fetchMods()).start();
+	}
+
 	/**
 	 * All endpoints
 	 *
@@ -26,17 +30,7 @@ public class API {
 		/**
 		 * Returns a list of all mods
 		 */
-		ListProducts("listproducts"),
-
-		/**
-		 * Get's a jar file
-		 */
-		GetProduct("getproduct?product=%s&token=%s"),
-
-		/**
-		 * Returns a list of all plugins a given user has bought
-		 */
-		CheckProducts("checkproducts?token=%s");
+		ListProducts("products");
 
 		String url;
 
@@ -68,20 +62,6 @@ public class API {
 			for (Mod mod : mods) {
 				mod.init();
 			}
-			StaticOAuth.getToken((token) -> {
-				try {
-					JsonObject json = new Gson()
-							.fromJson(API.fetchEndpoint(Types.CheckProducts, new String[] { token }), JsonObject.class);
-					if (json.get("success").getAsBoolean()) {
-						JsonArray arr = json.get("data").getAsJsonArray();
-						for (Mod mod : mods) {
-							mod.setPaid(arr.contains(new JsonPrimitive(mod.Name)));
-						}
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			});
 			return mods;
 		} catch (Exception ex) {
 			ex.printStackTrace();

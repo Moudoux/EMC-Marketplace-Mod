@@ -35,7 +35,7 @@ public class ModInfo extends IGuiScreen {
 
 	@Override
 	protected void onDraw(int mouseX, int mouseY, float partialTicks) {
-		this.drawIDefaultBackground();
+		this.drawITintBackground(0);
 		IFontRenderer.drawCenteredString(mod.getName(), getIGuiScreenWidth() / 2, 8, 16777215);
 		IFontRenderer.drawCenteredString("Developed by: " + mod.getOwner(), getIGuiScreenWidth() / 2, 20, 16777215);
 	}

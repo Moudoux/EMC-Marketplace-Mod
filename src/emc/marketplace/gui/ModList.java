@@ -61,6 +61,7 @@ public class ModList extends IGuiScreen {
 		if (mods == null) {
 			IFontRenderer.drawCenteredString("Loading mods... ", getIGuiScreenWidth() / 2, 45, 16777215);
 		}
+		IFontRenderer.drawString("Session active: " + (Main.isSessionActive() ? "§aYes" : "§cNo"), 2, 2, 0xFFFFFF);
 	}
 
 	@Override

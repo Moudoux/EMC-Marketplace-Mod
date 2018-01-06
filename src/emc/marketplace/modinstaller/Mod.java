@@ -7,14 +7,11 @@ import java.util.Base64;
 
 import org.apache.commons.io.FileUtils;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
-import emc.marketplace.modinstaller.API.Types;
 import lombok.Getter;
 import me.deftware.client.framework.Client.EMCClient;
-import me.deftware.client.framework.MC_OAuth.StaticOAuth;
 import me.deftware.client.framework.Main.FrameworkLoader;
+import me.deftware.client.framework.Marketplace.MarketplaceAPI;
+import me.deftware.client.framework.Marketplace.MarketplaceResponse;
 import me.deftware.client.framework.Wrappers.IMinecraft;
 
 /**
@@ -65,30 +62,27 @@ public class Mod {
 				cb.callback();
 				return;
 			}
-			StaticOAuth.getToken((token) -> {
-				if (isInstalled()) {
-					return;
+			// TODO
+			if (isInstalled()) {
+				return;
+			}
+			try {
+				MarketplaceResponse data = MarketplaceAPI.downloadMod(Name);
+				if (data.success) {
+					byte[] bytes = Base64.getDecoder().decode(data.data);
+					FileUtils.writeByteArrayToFile(modFile, bytes);
 				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			if (modFile.exists()) {
 				try {
-					String data = API.fetchEndpoint(Types.GetProduct, new String[] { Name, token });
-					JsonObject json = new Gson().fromJson(data, JsonObject.class);
-					if (json.get("success").getAsBoolean()) {
-						data = json.get("data").getAsString();
-						byte[] bytes = Base64.getDecoder().decode(data);
-						FileUtils.writeByteArrayToFile(modFile, bytes);
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
+					FrameworkLoader.loadClient(modFile);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				if (modFile.exists()) {
-					try {
-						FrameworkLoader.loadClient(modFile);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-				cb.callback();
-			});
+			}
+			cb.callback();
 		}).start();
 	}
 

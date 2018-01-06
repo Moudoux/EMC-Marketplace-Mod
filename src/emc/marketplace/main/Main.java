@@ -1,23 +1,33 @@
 package emc.marketplace.main;
 
+import java.util.Arrays;
+import java.util.List;
+
 import emc.marketplace.gui.ModList;
+import emc.marketplace.modinstaller.API;
+import emc.marketplace.modinstaller.Mod;
+import lombok.Getter;
 import me.deftware.client.framework.Client.EMCClient;
 import me.deftware.client.framework.Event.Event;
 import me.deftware.client.framework.Event.Events.EventActionPerformed;
 import me.deftware.client.framework.Event.Events.EventGuiScreenDraw;
+import me.deftware.client.framework.Marketplace.MarketplaceAPI;
 import me.deftware.client.framework.Wrappers.IMinecraft;
 import me.deftware.client.framework.Wrappers.Objects.IGuiButton;
 
 public class Main extends EMCClient {
 
+	@Getter
+	private static boolean sessionActive = false;
+
 	@Override
 	public void initialize() {
-
+		API.init();
 	}
 
 	@Override
 	public EMCClientInfo getClientInfo() {
-		return new EMCClientInfo("EMC-Marketplace", "1");
+		return new EMCClientInfo("EMC-Marketplace", "3");
 	}
 
 	@Override
@@ -33,6 +43,19 @@ public class Main extends EMCClient {
 	public void callMethod(String method, String caller) {
 		if (method.equals("openGUI()")) {
 			IMinecraft.setGuiScreen(new ModList(this));
+		}
+	}
+
+	@Override
+	public void onMarketplaceAuth(boolean success) {
+		sessionActive = success;
+		if (success) {
+			if (API.getMods() != null) {
+				List<String> paidModNames = Arrays.asList(MarketplaceAPI.getLicensedModNames());
+				for (Mod mod : API.getMods()) {
+					mod.setPaid(paidModNames.contains(mod.getName()));
+				}
+			}
 		}
 	}
 
