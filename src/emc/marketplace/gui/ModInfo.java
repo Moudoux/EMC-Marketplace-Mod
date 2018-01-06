@@ -1,5 +1,7 @@
 package emc.marketplace.gui;
 
+import java.util.ArrayList;
+
 import emc.marketplace.main.Main;
 import emc.marketplace.modinstaller.Mod;
 import lombok.Getter;
@@ -38,6 +40,31 @@ public class ModInfo extends IGuiScreen {
 		this.drawITintBackground(0);
 		IFontRenderer.drawCenteredString(mod.getName(), getIGuiScreenWidth() / 2, 8, 16777215);
 		IFontRenderer.drawCenteredString("Developed by: " + mod.getOwner(), getIGuiScreenWidth() / 2, 20, 16777215);
+		IFontRenderer.drawCenteredString("Mod description:", getIGuiScreenWidth() / 2, 60, 16777215);
+
+		int y = 70;
+		String desc = mod.getDescription();
+
+		if (IFontRenderer.getStringWidth(desc) > this.getIGuiScreenWidth()) {
+			ArrayList<String> lines = new ArrayList<String>();
+			String current = "";
+			for (String c : desc.split("")) {
+				if (IFontRenderer.getStringWidth(current + c) > this.getIGuiScreenWidth()) {
+					lines.add(current + "-");
+					current = c;
+				} else {
+					current += c;
+				}
+			}
+			lines.add(current);
+			for (String string : lines) {
+				IFontRenderer.drawCenteredString(string, getIGuiScreenWidth() / 2, y, 16777215);
+				y += IFontRenderer.getFontHeight() + 2;
+			}
+		} else {
+			IFontRenderer.drawCenteredString(desc, getIGuiScreenWidth() / 2, y, 16777215);
+		}
+
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package emc.marketplace.main;
 
-import java.util.Arrays;
 import java.util.List;
 
 import emc.marketplace.gui.ModList;
@@ -51,7 +50,7 @@ public class Main extends EMCClient {
 		sessionActive = success;
 		if (success) {
 			if (API.getMods() != null) {
-				List<String> paidModNames = Arrays.asList(MarketplaceAPI.getLicensedModNames());
+				List<String> paidModNames = MarketplaceAPI.getLicensedModNames();
 				for (Mod mod : API.getMods()) {
 					mod.setPaid(paidModNames.contains(mod.getName()));
 				}

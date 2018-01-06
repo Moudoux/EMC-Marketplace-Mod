@@ -62,7 +62,6 @@ public class Mod {
 				cb.callback();
 				return;
 			}
-			// TODO
 			if (isInstalled()) {
 				return;
 			}

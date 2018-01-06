@@ -17,7 +17,7 @@ import me.deftware.client.framework.Wrappers.Render.IRenderHelper;
 import me.deftware.client.framework.Wrappers.Render.IRenderItem;
 
 /**
- * The gui for browsing and installing mods
+ * The gui for browsing and installing API.getMods()
  * 
  * @author Deftware
  *
@@ -29,7 +29,6 @@ public class ModList extends IGuiScreen {
 	private boolean overrideText = false;
 	private List list;
 	private Main main;
-	public Mod[] mods;
 
 	public ModList(Main main) {
 		this.main = main;
@@ -48,7 +47,6 @@ public class ModList extends IGuiScreen {
 				new IGuiButton(2, getIGuiScreenWidth() / 2 + 2, getIGuiScreenHeight() - 51, 98, 20, "Details..."));
 		getIButtonList().get(1).setEnabled(false);
 		getIButtonList().get(2).setEnabled(false);
-		new Thread(() -> mods = API.fetchMods()).start();
 	}
 
 	@Override
@@ -56,10 +54,11 @@ public class ModList extends IGuiScreen {
 		this.drawIDefaultBackground();
 		list.doDraw(mouseX, mouseY, partialTicks);
 		IFontRenderer.drawCenteredString("EMC Marketplace", getIGuiScreenWidth() / 2, 8, 16777215);
-		IFontRenderer.drawCenteredString("Mods available: " + (mods != null ? mods.length : "0"),
+		IFontRenderer.drawCenteredString(
+				"API.getMods() available: " + (API.getMods() != null ? API.getMods().length : "0"),
 				getIGuiScreenWidth() / 2, 20, 16777215);
-		if (mods == null) {
-			IFontRenderer.drawCenteredString("Loading mods... ", getIGuiScreenWidth() / 2, 45, 16777215);
+		if (API.getMods() == null) {
+			IFontRenderer.drawCenteredString("Loading API.getMods()... ", getIGuiScreenWidth() / 2, 45, 16777215);
 		}
 		IFontRenderer.drawString("Session active: " + (Main.isSessionActive() ? "§aYes" : "§cNo"), 2, 2, 0xFFFFFF);
 	}
@@ -71,12 +70,12 @@ public class ModList extends IGuiScreen {
 
 	@Override
 	protected void onUpdate() {
-		if (mods == null) {
+		if (API.getMods() == null) {
 			return;
 		}
 		Mod selected = null;
-		if (!(mods.length == 0) && list.getSelectedSlot() != -1) {
-			selected = mods[list.getSelectedSlot()];
+		if (!(API.getMods().length == 0) && list.getSelectedSlot() != -1) {
+			selected = API.getMods()[list.getSelectedSlot()];
 		}
 		if (selected != null) {
 			if (!overrideText) {
@@ -98,10 +97,10 @@ public class ModList extends IGuiScreen {
 		}
 		if (buttonID == 0) {
 			IMinecraft.setGuiScreen(null);
-		} else if (mods != null) {
+		} else if (API.getMods() != null) {
 			// We can assume the selected is not null, since you cannot press any of the
 			// buttons if no mod is selected
-			Mod selected = mods[list.getSelectedSlot()];
+			Mod selected = API.getMods()[list.getSelectedSlot()];
 			if (buttonID == 1) {
 				// Install/Buy | Uninstall
 				if (selected.isInstalled()) {
@@ -156,12 +155,12 @@ public class ModList extends IGuiScreen {
 
 		@Override
 		protected int getISize() {
-			return mods != null ? mods.length : 0;
+			return API.getMods() != null ? API.getMods().length : 0;
 		}
 
 		@Override
 		protected void drawISlot(int id, int x, int y) {
-			Mod mod = mods[id];
+			Mod mod = API.getMods()[id];
 
 			IGlStateManager.enableRescaleNormal();
 			IGlStateManager.enableBlend();
