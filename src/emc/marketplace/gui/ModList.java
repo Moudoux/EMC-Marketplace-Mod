@@ -54,11 +54,10 @@ public class ModList extends IGuiScreen {
 		this.drawIDefaultBackground();
 		list.doDraw(mouseX, mouseY, partialTicks);
 		IFontRenderer.drawCenteredString("EMC Marketplace", getIGuiScreenWidth() / 2, 8, 16777215);
-		IFontRenderer.drawCenteredString(
-				"API.getMods() available: " + (API.getMods() != null ? API.getMods().length : "0"),
+		IFontRenderer.drawCenteredString("Mods available: " + (API.getMods() != null ? API.getMods().length : "0"),
 				getIGuiScreenWidth() / 2, 20, 16777215);
 		if (API.getMods() == null) {
-			IFontRenderer.drawCenteredString("Loading API.getMods()... ", getIGuiScreenWidth() / 2, 45, 16777215);
+			IFontRenderer.drawCenteredString("Loading mods... ", getIGuiScreenWidth() / 2, 45, 16777215);
 		}
 		IFontRenderer.drawString("Session active: " + (Main.isSessionActive() ? "§aYes" : "§cNo"), 2, 2, 0xFFFFFF);
 	}
