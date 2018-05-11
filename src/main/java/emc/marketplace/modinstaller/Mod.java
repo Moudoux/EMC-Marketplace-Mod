@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Base64;
 
+import me.deftware.client.framework.apis.marketplace.MarketplaceAPI;
+import me.deftware.client.framework.apis.marketplace.MarketplaceResponse;
+import me.deftware.client.framework.main.Bootstrap;
+import me.deftware.client.framework.main.EMCMod;
+import me.deftware.client.framework.wrappers.IMinecraft;
 import org.apache.commons.io.FileUtils;
 
 import lombok.Getter;
-import me.deftware.client.framework.Client.EMCClient;
-import me.deftware.client.framework.Main.FrameworkLoader;
-import me.deftware.client.framework.Marketplace.MarketplaceAPI;
-import me.deftware.client.framework.Marketplace.MarketplaceResponse;
-import me.deftware.client.framework.Wrappers.IMinecraft;
 
 /**
  * The mod class which contains all info about a mod
@@ -34,7 +34,7 @@ public class Mod {
 	@Getter
 	private File modFile = null, deleted = null;
 
-	private EMCClient client = null;
+	private EMCMod mod = null;
 
 	public void init() {
 		try {
@@ -55,9 +55,9 @@ public class Mod {
 		new Thread(() -> {
 			if (deleted.exists() && modFile.exists()) {
 				deleted.delete();
-				if (!FrameworkLoader.getClients().containsKey(Name) && client != null) {
-					FrameworkLoader.getClients().put(Name, client);
-					client = null;
+				if (!Bootstrap.getMods().containsKey(Name) && mod != null) {
+					Bootstrap.getMods().put(Name, mod);
+					mod = null;
 				}
 				cb.callback();
 				return;
@@ -76,7 +76,7 @@ public class Mod {
 			}
 			if (modFile.exists()) {
 				try {
-					FrameworkLoader.loadClient(modFile);
+					Bootstrap.loadMod(modFile);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -95,17 +95,17 @@ public class Mod {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			if (FrameworkLoader.getClients().containsKey(Name)) {
-				client = FrameworkLoader.getClients().get(Name);
-				FrameworkLoader.getClients().remove(Name);
+			if (Bootstrap.getMods().containsKey(Name)) {
+				mod = Bootstrap.getMods().get(Name);
+				Bootstrap.getMods().remove(Name);
 			}
 		}).start();
 	}
 
 	@FunctionalInterface
-	public static interface InstallCallback {
+	public interface InstallCallback {
 
-		public void callback();
+		void callback();
 
 	}
 

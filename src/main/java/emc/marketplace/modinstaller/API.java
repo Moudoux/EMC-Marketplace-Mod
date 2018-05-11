@@ -1,7 +1,7 @@
 package emc.marketplace.modinstaller;
 
-import com.google.gson.Gson;
 
+import com.google.gson.Gson;
 import lombok.Getter;
 
 /**

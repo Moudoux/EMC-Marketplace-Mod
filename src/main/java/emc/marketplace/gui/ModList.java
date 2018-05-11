@@ -1,20 +1,16 @@
 package emc.marketplace.gui;
 
-import org.lwjgl.input.Keyboard;
 
 import emc.marketplace.main.Main;
 import emc.marketplace.modinstaller.API;
 import emc.marketplace.modinstaller.Mod;
-import me.deftware.client.framework.Wrappers.IMinecraft;
-import me.deftware.client.framework.Wrappers.Item.IItemStack;
-import me.deftware.client.framework.Wrappers.Objects.IGuiButton;
-import me.deftware.client.framework.Wrappers.Objects.IGuiScreen;
-import me.deftware.client.framework.Wrappers.Objects.IGuiSlot;
-import me.deftware.client.framework.Wrappers.Render.IFontRenderer;
-import me.deftware.client.framework.Wrappers.Render.IGL11;
-import me.deftware.client.framework.Wrappers.Render.IGlStateManager;
-import me.deftware.client.framework.Wrappers.Render.IRenderHelper;
-import me.deftware.client.framework.Wrappers.Render.IRenderItem;
+import me.deftware.client.framework.wrappers.IMinecraft;
+import me.deftware.client.framework.wrappers.gui.IGuiButton;
+import me.deftware.client.framework.wrappers.gui.IGuiScreen;
+import me.deftware.client.framework.wrappers.gui.IGuiSlot;
+import me.deftware.client.framework.wrappers.item.IItemStack;
+import me.deftware.client.framework.wrappers.render.*;
+import org.lwjgl.input.Keyboard;
 
 /**
  * The gui for browsing and installing API.getMods()
@@ -59,7 +55,7 @@ public class ModList extends IGuiScreen {
 		if (API.getMods() == null) {
 			IFontRenderer.drawCenteredString("Loading mods... ", getIGuiScreenWidth() / 2, 45, 16777215);
 		}
-		IFontRenderer.drawString("Session active: " + (Main.isSessionActive() ? "§aYes" : "§cNo"), 2, 2, 0xFFFFFF);
+		IFontRenderer.drawString("Session active: " + (Main.isSessionActive() ? "ï¿½aYes" : "ï¿½cNo"), 2, 2, 0xFFFFFF);
 	}
 
 	@Override
@@ -114,7 +110,7 @@ public class ModList extends IGuiScreen {
 									: (selected.getPrice() == 0 || selected.isHasPaid()) ? "Install" : "Buy");
 						});
 					} else {
-						IGuiScreen.openLink(frontend + "mod/" + selected.getName());
+						IGuiScreen.openLink(frontend + "product/" + selected.getName());
 					}
 				}
 			} else if (buttonID == 2) {

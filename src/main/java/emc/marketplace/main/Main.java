@@ -6,15 +6,15 @@ import emc.marketplace.gui.ModList;
 import emc.marketplace.modinstaller.API;
 import emc.marketplace.modinstaller.Mod;
 import lombok.Getter;
-import me.deftware.client.framework.Client.EMCClient;
-import me.deftware.client.framework.Event.Event;
-import me.deftware.client.framework.Event.Events.EventActionPerformed;
-import me.deftware.client.framework.Event.Events.EventGuiScreenDraw;
-import me.deftware.client.framework.Marketplace.MarketplaceAPI;
-import me.deftware.client.framework.Wrappers.IMinecraft;
-import me.deftware.client.framework.Wrappers.Objects.IGuiButton;
+import me.deftware.client.framework.apis.marketplace.MarketplaceAPI;
+import me.deftware.client.framework.event.Event;
+import me.deftware.client.framework.event.events.EventActionPerformed;
+import me.deftware.client.framework.event.events.EventGuiScreenDraw;
+import me.deftware.client.framework.main.EMCMod;
+import me.deftware.client.framework.wrappers.IMinecraft;
+import me.deftware.client.framework.wrappers.gui.IGuiButton;
 
-public class Main extends EMCClient {
+public class Main extends EMCMod {
 
 	@Getter
 	private static boolean sessionActive = false;
@@ -25,8 +25,8 @@ public class Main extends EMCClient {
 	}
 
 	@Override
-	public EMCClientInfo getClientInfo() {
-		return new EMCClientInfo("EMC-Marketplace", "3");
+	public EMCModInfo getModInfo() {
+		return new EMCModInfo("EMC-Marketplace", "4.0.0");
 	}
 
 	@Override

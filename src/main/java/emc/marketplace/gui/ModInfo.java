@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import emc.marketplace.main.Main;
 import emc.marketplace.modinstaller.Mod;
 import lombok.Getter;
-import me.deftware.client.framework.Wrappers.IMinecraft;
-import me.deftware.client.framework.Wrappers.Objects.IGuiButton;
-import me.deftware.client.framework.Wrappers.Objects.IGuiScreen;
-import me.deftware.client.framework.Wrappers.Render.IFontRenderer;
+import me.deftware.client.framework.wrappers.IMinecraft;
+import me.deftware.client.framework.wrappers.gui.IGuiButton;
+import me.deftware.client.framework.wrappers.gui.IGuiScreen;
+import me.deftware.client.framework.wrappers.render.IFontRenderer;
 
 /**
  * Gui for showing more info about a mod
@@ -87,7 +87,7 @@ public class ModInfo extends IGuiScreen {
 						getIButtonList().get(0).setText("Uninstall");
 					});
 				} else {
-					IGuiScreen.openLink(ModList.frontend + "mod/" + mod.getName());
+					IGuiScreen.openLink(ModList.frontend + "product/" + mod.getName());
 				}
 			}
 		} else if (buttonID == 1) {

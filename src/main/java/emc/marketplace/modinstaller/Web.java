@@ -48,9 +48,7 @@ public class Web {
 
 	/**
 	 * Sends a POST request to a given url, with JSON data as payload
-	 * 
-	 * @param url
-	 * @param data
+	 *
 	 * @return String
 	 */
 	public static String post(String uri, HashMap<String, String> payload) throws Exception {
